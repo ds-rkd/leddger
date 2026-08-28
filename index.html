@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel · Gestão de Vendas</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Ledger</div>
+        <div class="brand-sub">vendas · estoque · financeiro</div>
+      </div>
+    </div>
+
+    <nav class="nav-group">
+      <button class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="vendas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.5l2.6 12.6a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21.5 8H6"/></svg>
+        Vendas
+      </button>
+      <button class="nav-item" data-page="produtos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.5 7.3 12 3 3.5 7.3 12 11.5l8.5-4.2Z"/><path d="M3.5 7.3v9.4L12 21l8.5-4.3V7.3"/><path d="M12 11.5V21"/></svg>
+        Produtos
+      </button>
+      <button class="nav-item" data-page="estoque">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Estoque
+      </button>
+      <button class="nav-item" data-page="relatorios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+        Relatórios
+      </button>
+      <button class="nav-item" data-page="configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+        Configurações
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sheets-status" id="sheetsStatus">
+        <span class="status-dot off" id="sheetsStatusDot"></span>
+        <span id="sheetsStatusText">Verificando Google Sheets…</span>
+      </div>
+      <div class="theme-toggle">
+        <span id="themeLabel">Modo claro</span>
+        <button id="themeToggleBtn" aria-label="Alternar tema"></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-col">
+    <header class="topbar">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-actions" id="periodControls">
+        <select class="select-control" id="periodSelect">
+          <option value="hoje">Hoje</option>
+          <option value="ontem">Ontem</option>
+          <option value="7dias">Últimos 7 dias</option>
+          <option value="30dias" selected>Últimos 30 dias</option>
+          <option value="este_mes">Este mês</option>
+          <option value="mes_anterior">Mês anterior</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+        <input type="date" id="dateStart" style="display:none;">
+        <input type="date" id="dateEnd" style="display:none;">
+      </div>
+    </header>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="page" data-page-content="dashboard">
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><h3>Faturamento e lucro</h3><span class="hint">por dia, no período</span></div>
+          <div class="chart-box"><canvas id="chartRevenue"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3>Vendas por categoria</h3></div>
+          <div class="chart-box"><canvas id="chartCategory"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid-2-even" style="margin-top:16px;">
+        <div class="panel">
+          <div class="panel-header"><h3>Produtos mais vendidos</h3></div>
+          <div id="topProductsList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3>Estoque baixo</h3></div>
+          <div id="lowStockList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VENDAS (PDV) ===================== -->
+    <section class="page page-hidden" data-page-content="vendas">
+      <div class="pdv-grid">
+        <div class="panel">
+          <div class="panel-header"><h3>Nova venda</h3></div>
+          <div class="form-grid">
+            <div class="field field-full">
+              <label for="pdvProduct">Produto</label>
+              <select id="pdvProduct"></select>
+            </div>
+            <div class="field">
+              <label for="pdvQty">Quantidade</label>
+              <input type="number" id="pdvQty" min="1" value="1">
+            </div>
+            <div class="field">
+              <label>Estoque disponível</label>
+              <div class="stock-pill" id="pdvStockAvailable">—</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="pdv-summary-row"><span>Valor unitário</span><span class="num" id="pdvUnitPrice">R$ 0,00</span></div>
+            <div class="pdv-summary-row"><span>Total</span><span class="num" id="pdvTotal">R$ 0,00</span></div>
+          </div>
+          <div class="modal-actions" style="justify-content:flex-start; margin-top:20px;">
+            <button class="btn btn-primary" id="pdvConfirmBtn">Confirmar venda</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h3>Histórico de vendas</h3></div>
+          <input type="text" id="salesSearch" placeholder="Pesquisar por produto…" style="width:100%; margin-bottom:12px;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Produto</th><th class="num">Qtd</th><th class="num">Total</th><th class="num">Lucro</th></tr></thead>
+              <tbody id="salesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUTOS ===================== -->
+    <section class="page page-hidden" data-page-content="produtos">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Produtos cadastrados</h3>
+          <button class="btn btn-primary btn-sm" id="newProductBtn">+ Novo produto</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th>Categoria</th><th class="num">Custo</th><th class="num">Preço</th><th class="num">Margem</th><th class="num">Estoque</th><th></th></tr></thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ESTOQUE ===================== -->
+    <section class="page page-hidden" data-page-content="estoque">
+      <div class="panel">
+        <div class="panel-header"><h3>Estoque atual</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th class="num">Estoque</th><th class="num">Mínimo</th><th>Status</th><th></th></tr></thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Movimentações recentes</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th class="num">Quantidade</th><th>Motivo</th></tr></thead>
+            <tbody id="movementsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RELATÓRIOS ===================== -->
+    <section class="page page-hidden" data-page-content="relatorios">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Produtos mais rentáveis</h3>
+          <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Exportar CSV</button>
+        </div>
+        <div class="kpi-grid" id="profitabilityHighlights"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Faturamento</th><th class="num">Lucro</th><th class="num">Margem</th><th class="num">Giro</th></tr></thead>
+            <tbody id="reportsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONFIGURAÇÕES ===================== -->
+    <section class="page page-hidden" data-page-content="configuracoes">
+      <div class="panel">
+        <div class="panel-header"><h3>Conexão com Google Sheets</h3></div>
+        <div class="sheets-status" id="settingsSheetsStatus" style="max-width:320px;">
+          <span class="status-dot off"></span><span>Verificando…</span>
+        </div>
+        <p class="hint" style="margin-top:12px; color:var(--ink-soft); font-size:12.5px;">
+          Configure <code>GOOGLE_CREDENTIALS_FILE</code> e <code>GOOGLE_SHEET_ID</code> no arquivo <code>.env</code>
+          na raiz do projeto. Veja o README para o passo a passo completo.
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Modal: cadastro/edição de produto -->
+<div class="modal-overlay hidden" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Novo produto</h3>
+      <button class="modal-close" data-close-modal>&times;</button>
+    </div>
+    <form id="productForm">
+      <input type="hidden" id="productId">
+      <div class="form-grid">
+        <div class="field field-full">
+          <label for="productNome">Nome</label>
+          <input type="text" id="productNome" required>
+        </div>
+        <div class="field">
+          <label for="productCategoria">Categoria</label>
+          <input type="text" id="productCategoria">
+        </div>
+        <div class="field">
+          <label for="productAtivo">Status</label>
+          <select id="productAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select>
+        </div>
+        <div class="field">
+          <label for="productCusto">Custo (R$)</label>
+          <input type="number" step="0.01" min="0" id="productCusto" required>
+        </div>
+        <div class="field">
+          <label for="productPreco">Preço de venda (R$)</label>
+          <input type="number" step="0.01" min="0" id="productPreco" required>
+        </div>
+        <div class="field">
+          <label for="productEstoqueInicial">Estoque inicial</label>
+          <input type="number" min="0" id="productEstoqueInicial" required>
+        </div>
+        <div class="field">
+          <label for="productEstoqueMinimo">Estoque mínimo</label>
+          <input type="number" min="0" id="productEstoqueMinimo" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar produto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: ajuste de estoque -->
+<div class="modal-overlay hidden" id="stockModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Ajustar estoque</h3>
+      <button class="modal-close" data-close-modal>&times;</button>
+    </div>
+    <form id="stockForm">
+      <input type="hidden" id="stockProductId">
+      <div class="form-grid">
+        <div class="field field-full"><label id="stockProductLabel"></label></div>
+        <div class="field">
+          <label for="stockTipo">Tipo</label>
+          <select id="stockTipo"><option value="entrada">Entrada</option><option value="saida">Saída</option></select>
+        </div>
+        <div class="field">
+          <label for="stockQtd">Quantidade</label>
+          <input type="number" min="1" id="stockQtd" required>
+        </div>
+        <div class="field field-full">
+          <label for="stockMotivo">Motivo</label>
+          <input type="text" id="stockMotivo" placeholder="Ex: reposição, avaria, contagem…" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Confirmar ajuste</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sales.js') }}"></script>
+</body>
+</html>
